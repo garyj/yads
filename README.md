@@ -1,15 +1,15 @@
 
-# {{ project_name|upper }} - Yet Another Django Starter
+# YADS - Yet Another Django Starter
 
 A personal Django Starter project that I use to get started quickly with new Django Apps.
 
-This Django Template is is auto generated from [garyj/{{ project_name }}app](https://github.com/garyj/{{ project_name }}app)
+This Django Template is is auto generated from [garyj/yadsapp](https://github.com/garyj/yadsapp)
 
 Inspired by [jefftriplett/django-startproject](https://github.com/jefftriplett/django-startproject)
 
 ## 🚩 Core Features
 
-- Django 2+ with Python 3.13
+- Django 5.2+ with Python 3.13
 - HTMX for seamless server-side interactions
 - Tailwind CSS v4 for modern styling
 - Alpine.js for lightweight reactivity
@@ -36,7 +36,7 @@ Inspired by [jefftriplett/django-startproject](https://github.com/jefftriplett/d
 # Create a new project
 django-admin startproject \
     --extension=ini,py,toml,yaml,yml,md \
-    --template=https://github.com/garyj/{{ project_name }}/archive/main.zip \
+    --template=https://github.com/garyj/yads/archive/main.zip \
     myproject
 
 cd myproject
