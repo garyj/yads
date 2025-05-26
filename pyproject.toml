@@ -1,0 +1,189 @@
+[project]
+name = "{{ project_name }}"
+version = "0.1.0"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+  "dj-database-url>=2.3.0",
+  "django-extensions>=3.2.3",
+  "django-htmx>=1.21.0",
+  "django-stubs-ext>=5.2",
+  "django-template-partials>=24.4",
+  "django[argon2]>=5.2",
+  "heroicons>=2.9.0",
+  "psycopg[c]>=3.2.4",
+  "pydantic-settings>=2.7.1",
+  "uvicorn[standard]>=0.34.0",
+  "whitenoise>=6.8.2",
+]
+
+[dependency-groups]
+dev = [
+  "django-types>=0.20.0",
+  "faker>=33.1.0",
+  "pytest-cov>=6.0.0",
+  "pytest-django>=4.9.0",
+  "pytest-mock>=3.14.0",
+  "pytest>=8.3.3",
+  "pyright>=1.1.393",
+]
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pyright]
+include = ["src", "packages"]
+exclude = ["**/node_modules", "**/__pycache__"]
+reportUnnecessaryTypeIgnoreComment = true
+reportMissingImports = true
+reportUnusedVariable = true
+typeCheckingMode = "standard"
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"
+
+[tool.ruff]
+line-length = 119
+exclude = ["**/migrations/**"]
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = 'single'
+
+[tool.ruff.lint]
+# Allow unused variables when underscore-prefixed
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+extend-select = [
+  "ANN", # Annotations
+  "A", # fix shadowing of builtins: https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+  "ARG", # Checks for unused arguments (can be a bit annoying with pytext fixtures)
+  "ASYNC", # Async stuff for example: functions should not call blocking HTTP methods
+  "B", # Bugbear
+  "BLE", # Blind Exceptions (be specific with Exceptions for example catch KeyError instead of BaseException)
+  "C4", # Comprehensionhttps://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+  "C90", # Too complex. See mccabe below
+  "DTZ", # fix setting of timezone in source code and tests
+  "DJ", # flake8-django
+  "E", # pycodestyle errors https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+  "EXE", # She Bank Executables
+  "F", # Flakes (pyflake)
+  "FBT", # fix the boolean trap issues https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
+  "FLY", # Better string joins https://docs.astral.sh/ruff/rules/static-join-to-f-string/
+  "FURB", # Modernizing Python code, for us make sure we are using new conventions
+  "G", # Logging
+  "I", # isort
+  "ICN", # Import conventions eg: pd in: import pandas as pd
+  "INP", # Directories should contain an __init__.py (we are not using namespace packages)
+  "ISC", # String concatenation
+  "N", # Naming conventions https://docs.astral.sh/ruff/rules/#pep8-naming-n
+  "NPY", # Numpy stuff
+  "PD", # implement this DataFrame linting
+  "PERF", # Performance anti-patterns https://docs.astral.sh/ruff/rules/#perflint-perf
+  "PGH", # fix the blanket type: ignore comments
+  "PIE", # Unnecessary spreads, dics, etc https://pypi.org/project/flake8-pie/
+  "PL", # PyLint - maybe too restrictive but will try  https://pypi.org/project/pylint/
+  "PT", # Pytest Stuff - !VERY GOOD
+  "PTH", # Use pathlib
+  "RET", # Return statements
+  "RSE", # Checks for raises statements
+  "RUF", # Ruff rules
+  "S", # Bandit
+  "SIM", # Simplification of code eg: yoda conditions https://pypi.org/project/flake8_simplify/
+  "SLF", # Checks for private member access
+  "SLOT", # Checks for __slots__ (not used at time of writing but may in the future)
+  "T10", # Debugger calls
+  "TC", # Manages imports that are only used for Type Checking eg: https://docs.astral.sh/ruff/rules/typing-only-third-party-import/ #noqa
+  "TD", # Checks the TODO comments (e.g. to have an author)
+  "TID", # Checks import statements https://pypi.org/project/flake8-tidy-imports/
+  "TRY", # Prevent Exception Handling AntiPatterns https://pypi.org/project/tryceratops/
+  "UP", # Pyupgrade
+  "W", # Pycodestyle
+  "YTT", # sys.version https://docs.astral.sh/ruff/rules/#flake8-2020-ytt
+]
+
+ignore = [
+  "ANN002", # Ignore missing type annotations for *args
+  "ANN003", # Ignore missing type annotations for **kwargs
+  "ANN401", # Allow Any annotation (for example in Signals where the first argument is sender to annotate with Any)
+  "ARG002", # In Django often required arguments such as `request` or `sender` to a function may not be accessed hence we ignore this rule
+  "B027", # Allow non-abstract empty methods in abstract base classes
+  "C901", # Ignore complexity
+  "D104", # Ignore missing docstrings for __init__ methods
+  "D105", # Ignore missing docstrings for magic methods
+  "D107", # Ignore missing docstrings for __init__ methods
+  "FBT003", # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "ISC001", # Allow string concatenation
+  "PLR6301", # Allow unused self. In Django Class based views this will be common
+  "TD003", # Do not require an issue link in a todo comment
+  "TRY003", # Allow for messages in exceptions https://docs.astral.sh/ruff/rules/raise-vanilla-args/
+]
+
+# Exclude a variety of commonly ignored directories
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".github",
+  ".hg",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "**pypackages**",
+  "_build",
+  "build",
+  "dist",
+  "migrations",
+  "node_modules",
+  "static",
+]
+
+
+[tool.ruff.lint.isort]
+known-first-party = ["{{ project_name }}", "tests"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"apps.py" = ["E402"]
+"src/config/**/*.py" = ["F403", "F405"]
+"**/tests/**/*" = [
+  "ANN001", # Missing type annotation for function argument
+  "ANN201", # Missing return type annotation
+  "ANN202", # No return type
+  "ARG001", # Allow unused arguments in tests
+  "PLR2004", # Allow use of magic values eg:  assert len(form.errors) == 5
+  "S101", # Allow Use of asserts
+  "S105", # Don't complain on suspected use of secrets in tests
+  "PGH003", # Use specific rule codes when ignoring type issues
+  "PLR0913", # Too many arguments in function definition
+  "PLR0917", # Too many positional arguments
+  "S105", # Hard coded secrets
+  "SLF001", # Allow access to protected member
+]
+"conftest.py" = [
+  "S101", # Allow asserts within fixtures
+]
+
+[tool.djlint]
+ignore = "H021"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+
+[tool.coverage.run]
+branch = true
+omit = [
+  "*/admin.py",
+  "*/manage.py",
+  "*/migrations/*",
+  "*/migrations/*",
+  "*/tests/*",
+  "conftest.py",
+]
