@@ -18,6 +18,40 @@ from config.settings.env import pydenset
 # https://github.com/typeddjango/django-stubs?tab=readme-ov-file#i-cannot-use-queryset-or-manager-with-type-annotations
 django_stubs_ext.monkeypatch()
 
+# Sentry Integration
+# https://docs.sentry.io/platforms/python/integrations/django/
+if pydenset.SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.types import Event, Hint
+
+    def before_send(event: Event, hint: Hint) -> Event | None:  # noqa: ARG001
+        # Ignore events where the request path is /favicon.ico
+        if (url := event.get('request', {}).get('url', '')) and str(url).endswith('/favicon.ico'):
+            return None
+
+        return event
+
+    def before_send_transaction(event: Event, hint: Hint) -> Event | None:  # noqa: ARG001
+        # Ignore requests to / and to /api/healthz
+        if event.get('transaction') == '/' or '/api/healthz' in event.get('transaction', ''):
+            return None
+        return event
+
+    sentry_sdk.init(
+        dsn=pydenset.SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(transaction_style='url'),
+            LoggingIntegration(),
+        ],
+        traces_sample_rate=1.0 if pydenset.DEBUG else 0.1,  # 10% in production (TODO: make this configurable)
+        send_default_pii=True,
+        profiles_sample_rate=1.0,
+        before_send=before_send,
+        before_send_transaction=before_send_transaction,
+    )
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -41,6 +75,8 @@ INTERNAL_IPS = pydenset.INTERNAL_IPS
 # A list of trusted origins for unsafe requests (e.g. POST).
 # https://docs.djangoproject.com/en/5.1/ref/settings/#csrf-trusted-origins
 CSRF_TRUSTED_ORIGINS = pydenset.CSRF_TRUSTED_ORIGINS
+
+ADMIN_URL = pydenset.ADMIN_URL
 
 # Application definition
 # https://docs.djangoproject.com/en/5.1/ref/settings/#installed-apps
@@ -202,6 +238,53 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging Configuration
+# https://docs.djangoproject.com/en/5.1/topics/logging/
+# Simple console-based logging since Sentry handles errors and cloud provider handles log aggregation
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {name} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple' if DEBUG else 'verbose',
+        },
+    },
+    'root': {
+        'level': 'INFO',
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'WARNING',  # Set to DEBUG to see SQL queries in development
+            'propagate': False,
+        },
+        # Application loggers
+        '{{ project_name }}': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 SILENCED_SYSTEM_CHECKS = [
     'staticfiles.W004',  # silence missing static files dir as we don't use it in development
