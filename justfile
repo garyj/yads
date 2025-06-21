@@ -56,6 +56,10 @@ shell *ARGS:
 manage *ARGS:
     docker compose run --rm web python manage.py {{ ARGS }}
 
+# destroy all docker-compose services and remove volumes and orphans
+destroy:
+    docker compose down -v --remove-orphans
+
 # check code quality with ruff and npm linters
 lint:
     uv run ruff check {{ sources }}
@@ -105,6 +109,11 @@ restart:
 # rebuild and restart all docker-compose services
 rebuild:  stop build start logs
 
+# Create a superuser for the Django application
+superuser:
+	docker compose run -e DJANGO_SUPERUSER_PASSWORD=a --rm web \
+	python manage.py createsuperuser --noinput \
+	--username a --email="a@a.com.au"
 
 ########################################################################################################################
 # Below targets use the compose-prod.yaml which tries to get closer to production
